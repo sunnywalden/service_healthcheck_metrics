@@ -2,5 +2,5 @@ werkzeug==0.16.0
 flask==1.1.1
 prometheus-client==0.7.1
 flask==1.0.2
-flask_restful==0.3.7
+flask_restful==0.3.8
 uwsgi==2.0.18
