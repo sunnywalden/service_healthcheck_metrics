@@ -1,6 +1,8 @@
-werkzeug==1.0.0
-flask==1.1.1
-prometheus-client==0.7.1
-flask==1.0.2
-flask_restful==0.3.8
-uwsgi==2.0.18
+requests
+werkzeug
+flask
+prometheus-client
+flask_restful
+uwsgi
+py-eureka-client
+apollo-client
