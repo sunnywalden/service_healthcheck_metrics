@@ -22,7 +22,7 @@ def get_client(eureka_hosts="127.0.0.1"):
         return eureka_client
 
 
-def register_ops(eureka_server=None, instance_ip='127.0.0.1', instance_port='8000', app_name=None):
+def register_service(eureka_server=None, instance_ip='127.0.0.1', instance_port='8000', app_name=None):
     # The flowing code will register your server to eureka server and also start to send heartbeat every 30 seconds
     eureka_client.init_registry_client(
         eureka_server=eureka_server,
@@ -31,7 +31,7 @@ def register_ops(eureka_server=None, instance_ip='127.0.0.1', instance_port='800
         instance_ip=instance_ip)
 
 
-def unregister_ops():
+def unregister_service():
     eureka_client.stop()
 
 
