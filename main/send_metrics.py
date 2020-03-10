@@ -41,7 +41,16 @@ def app_status():
     eureka_client.stop()
     app_infos = applications_info(all_apps)
     unavailable_services = cache_services(app_infos)
-    app_default_infos = default_infos(unavailable_services)
+    unavailable_services_info = list(
+        map(
+            lambda service_str: {
+                "product": service_str.split('_')[0],
+                "service": service_str.split('_')[1],
+                "env_type": service_str.split('_')[2]
+            },
+            unavailable_services)
+    )
+    app_default_infos = default_infos(unavailable_services_info)
     logger.info("Applications health metric: %s".format(app_infos))
 
     return {**app_infos, **app_default_infos}
@@ -51,6 +60,7 @@ class AppCollector(object):
     """
             prometheus custom metric collector
     """
+
     def __init__(self):
         self.app_list = app_status()
         log = Logger()
@@ -64,7 +74,7 @@ class AppCollector(object):
         g = GaugeMetricFamily(
             "service_health_status",
             "Application Health Status",
-            labels=["product", "service", "env_type", "hostname", "health_check",  "service_addr", "homepage"]
+            labels=["product", "service", "env_type", "hostname", "health_check", "service_addr", "homepage"]
         )
         for app, app_infos in self.app_list.items():
             self.logger.info(" Application %s info %s" % (app, app_infos))

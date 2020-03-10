@@ -11,9 +11,9 @@ class Logger(object):
         self.log_level = log_level
 
     def logger_generate(self):
-        stdout_handler = logging.StreamHandler(stream=sys.stdout)
+        stdout_handler = logging.StreamHandler(sys.stdout)
         stderr_handler = logging.StreamHandler(sys.stderr)
-        stderr_handler.setLevel(self.log_level)
+        stdout_handler.setLevel(self.log_level)
         stderr_handler.setLevel(max(self.log_level, logging.WARNING))
         formatter = logging.Formatter(
             '%(asctime)s %(process)d %(levelname)s %(thread)d - %(funcName)s %(filename)s:%(lineno)d -[日志信息]: %('

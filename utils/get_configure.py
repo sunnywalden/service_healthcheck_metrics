@@ -90,7 +90,11 @@ def unregister_services_conf():
     if not service_dict: return all_services
     for product, service_str in service_dict.items():
         for service in services_str.split(','):
-            all_services.append({"product": all_services[product], "service": service, "env_type": env_type})
+            service_attr = {"product": all_services[product], "service": service, "env_type": env_type}
+            try:
+                all_services.index(service_attr)
+            except ValueError as e:
+                all_services.append(service_attr)
     return all_services
 
 

@@ -125,11 +125,21 @@ def cache_services(applications_info):
     delete_services = unregister_services_conf()
     if not cached_services:
         services = service_lists
-        unavailable_services = ()
+        unavailable_services = set()
     else:
-        services = set(cached_services).union(set(service_lists)).difference(delete_services)
+        logger.info(cached_services, service_lists, delete_services)
+        cached_services_str_list = list(map(lambda service_dict: '_'.join(service_dict.values()), cached_services))
+        service_str_lists = list(map(lambda service_dict: '_'.join(service_dict.values()), service_lists))
+        delete_str_services = list(map(lambda service_dict: '_'.join(service_dict.values()), delete_services))
+        all_services = set(cached_services_str_list).union(set(service_str_lists)).difference(set(delete_str_services))
         # 异常服务集合
-        unavailable_services = set(cached_services).difference(service_lists).difference(delete_services)
+        unavailable_services = \
+            set(cached_services_str_list).difference(set(service_str_lists)).difference(set(delete_str_services))
+        services = list(map(lambda service_str: {
+                "product": service_str.split('_')[0],
+                "service": service_str.split('_')[1],
+                "env_type": service_str.split('_')[2]
+            }, all_services))
 
     cache_set('services', services)
     logger.info("Service cache updated!")
