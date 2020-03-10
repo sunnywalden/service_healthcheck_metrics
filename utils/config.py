@@ -4,6 +4,11 @@
 import configparser as ConfigParser
 import os, re, io
 
+from utils.console_logger import Logger
+
+log = Logger()
+logger = log.logger_generate()
+
 
 def format_config(filename):
     file_data = ""
@@ -61,7 +66,7 @@ class config:
         returnStr = ""
 
         # self.checkSection(section)
-        # print(self.config.get(section, option))
+        # logger.info(self.config.get(section, option))
 
         if not self.config.has_option(section, option):
             # 如果对应section中没有找到option则到通用的section中查找option
@@ -82,7 +87,7 @@ class config:
                     returnStr = self.config.get("common", option)
         else:
             if type == "bool":
-                print('Debug')
+                logger.info('Debug')
                 returnStr = self.config.getboolean(section, option)
             elif type == "int":
                 returnStr = self.config.getint(section, option)

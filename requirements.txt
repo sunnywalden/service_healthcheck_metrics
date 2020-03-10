@@ -6,3 +6,4 @@ flask_restful
 uwsgi
 py-eureka-client
 apollo-client
+redis

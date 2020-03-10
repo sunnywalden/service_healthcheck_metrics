@@ -29,62 +29,26 @@
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-### Prerequisites
+
+### configure
+
+请根据实际需要，修改.ini中Apollo信息；
+配置中心设置Eureka、Redis相关配置项。
+
+
+
+### Deploy
+
+```shell script
+
+mkdir -p /data/healthcheck_exporter/configs
+
+cp -r configs/* /data/healthcheck_exporter/configs/
+
+docker-compose up -d
 
 ```
-python             	>=3.7.5
-	
-requests
-werkzeug
-flask
-prometheus-client
-flask_restful
-uwsgi
-py-eureka-client
-apollo-client	
-```
 
-### Installing
-
-1.clone this project to your server with git clone comand.
-git clone ...
-
-2.install those depending packages in requirements.txt with pip install.
-```
-yum install -y python-devel
-
-yum install python-pip
-
-pip install --upgrade pip
-
-python -m pip install --user virtualenv
-
-cd prometheus_metrics
-
-python -m virtualenv env
-
-source env/bin/activate
-
-pip install requests
-
-pip install -r requirements.txt
-```
-
-
-3.update configs/config.ini 、configs/apollo.ini in your needs.
-
-
-4.alter iptables configure to let requests of services' port could reachable.
-
-```
-iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
-```
-
-
-5.service start.
-```
-	python main/send_metrics.py
-```
 
 
 ## Acknowledgments

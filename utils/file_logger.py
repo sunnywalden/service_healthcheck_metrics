@@ -6,13 +6,13 @@ from logging.handlers import RotatingFileHandler
 import os
 
 
-class Log(object):
+class Logger(object):
     def __init__(self):
-        self.logger = logging.getLogger('log')
+        self.__logger = logging.getLogger('log')
 
     def logger_generate(self, name):
 
-        self.logger.setLevel(logging.INFO)
+        self.__logger.setLevel(logging.INFO)
 
         log_file = os.path.join('./logs', name + '.log')
 
@@ -22,7 +22,7 @@ class Log(object):
         formatter = logging.Formatter(
             fmt='%(asctime)s %(process)d %(levelname)s %(thread)d - %(funcName)s %(filename)s:%(lineno)d %(message)s')
         handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+        self.__logger.addHandler(handler)
         socket.setdefaulttimeout(10)
 
-        return self.logger
+        return self.__logger

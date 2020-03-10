@@ -1,7 +1,8 @@
 FROM sunnywalden/centos7-python3.7:latest
 
 # env
-ENV ENV_TYPE=prod
+ENV ENV_TYPE=prod \
+    EXTERNAL=False
 
 RUN mkdir -p /opt/application/healthcheck_exporter/
 
