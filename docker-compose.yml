@@ -4,7 +4,7 @@ services:
     image: sunnywalden/service-healthcheck-metrics:latest
     container_name: service_healthcheck
     ports:
-      - "8000:8000"
+      - "8000:8080"
     environment:
       ENV_TYPE: prod
       EXTERNAL: "false"
