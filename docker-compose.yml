@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     environment:
       ENV_TYPE: prod
-      EXTERNAL: False
+      EXTERNAL: "false"
     volumes:
       - /data/healthcheck_metrics/configs/:/opt/application/healthcheck_metrics/configs/
     networks:
