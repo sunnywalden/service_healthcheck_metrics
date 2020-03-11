@@ -41,9 +41,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ```shell script
 
-mkdir -p /data/healthcheck_exporter/configs
+mkdir -p /data/healthcheck_metrics/configs
 
-cp -r configs/* /data/healthcheck_exporter/configs/
+cp -r configs/* /data/healthcheck_metrics/configs/
 
 docker-compose up -d
 
