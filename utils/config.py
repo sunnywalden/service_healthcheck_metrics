@@ -7,7 +7,7 @@ import os, re, io
 from utils.console_logger import Logger
 
 log = Logger()
-logger = log.logger_generate()
+logger = log.logger()
 
 
 def format_config(filename):

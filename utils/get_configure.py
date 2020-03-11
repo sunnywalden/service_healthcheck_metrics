@@ -7,8 +7,9 @@ import json
 from utils.apollo_handler import apo_client, apo_config
 from utils.config import config
 from utils.console_logger import Logger
+
 log = Logger()
-logger = log.logger_generate()
+logger = log.logger()
 
 
 def env_file_conf(conf_name, conf_type='string', default=None):

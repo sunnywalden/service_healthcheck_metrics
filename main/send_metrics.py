@@ -17,7 +17,7 @@ from utils.console_logger import Logger
 eureka_client = None
 env_type = env_file_conf('ENV_TYPE', default='DEV')
 log = Logger()
-logger = log.logger_generate()
+logger = log.logger()
 
 
 def app_status():
@@ -31,7 +31,7 @@ def app_status():
     try:
         eureka_ip = apollo_envs_conf(eureka_conf)
     except Exception as e:
-        logger.error("Connecting apollo failed! %s".format(e.__repr__()))
+        print("Connecting apollo failed! %s".format(e.__repr__()))
         exit(1)
     global eureka_client
     if not eureka_client:
@@ -51,7 +51,7 @@ def app_status():
             unavailable_services)
     )
     app_default_infos = default_infos(unavailable_services_info)
-    logger.info("Applications health metric: %s".format(app_infos))
+    print("Applications health metric: %s".format(app_infos))
 
     return {**app_infos, **app_default_infos}
 
@@ -63,8 +63,6 @@ class AppCollector(object):
 
     def __init__(self):
         self.app_list = app_status()
-        log = Logger()
-        self.logger = log.logger_generate()
 
     def collect(self):
         """
@@ -77,7 +75,7 @@ class AppCollector(object):
             labels=["product", "service", "env_type", "hostname", "health_check", "service_addr", "homepage"]
         )
         for app, app_infos in self.app_list.items():
-            self.logger.info(" Application %s info %s" % (app, app_infos))
+            print(" Application %s info %s" % (app, app_infos))
             for app_info in app_infos:
                 app_statu = 0 if app_info['status'] != "UP" else 1
                 try:
@@ -93,9 +91,9 @@ class AppCollector(object):
                         ], app_statu
                     )
                 except Exception as e:
-                    self.logger.error('Error while prepare metric %s'.format(e.__str__()))
+                    print('Error while prepare metric %s'.format(e.__str__()))
                 else:
-                    self.logger.info('push metric finished one time!')
+                    print('push metric finished one time!')
 
         yield g
 
@@ -108,6 +106,6 @@ if __name__ == "__main__":
     try:
         REGISTRY.register(AppCollector())
     except AttributeError as e:
-        logger.error("Connecting to apollo server failed!")
+        print("Connecting to apollo server failed!")
     while True:
         time.sleep(60)

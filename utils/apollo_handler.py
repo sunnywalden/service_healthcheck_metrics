@@ -5,8 +5,6 @@ import sys
 
 from pyapollo import ApolloClient
 
-# sys.path.append("..")
-
 
 def apo_client(app_id, **kwargs):
     """
