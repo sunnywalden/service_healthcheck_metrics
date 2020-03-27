@@ -111,6 +111,7 @@ class AppCollector(object):
         )
 
         for app, app_infos in self.app_list.items():
+            if not app_infos: break
             metrics = metric_prepare(app, app_infos)
             for metric in metrics:
                 g.add_metric(metric[:-1], metric[-1])

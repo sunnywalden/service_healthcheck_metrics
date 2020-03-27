@@ -8,7 +8,7 @@ from utils.apollo_handler import apo_client, apo_config
 from utils.config import config
 
 root_path = os.path.dirname(os.path.abspath(__file__))
-tmp_path = os.path.join(root_path, 'configs/' + 'configs.dat')
+tmp_path = os.path.join(root_path, '../configs/' + 'configs.dat')
 
 
 def env_file_conf(conf_name, conf_type='string', default=None):
@@ -78,14 +78,14 @@ def apollo_envs_conf(conf_name, conf_type='string'):
     client.stop()
 
     # 从apollo获取失败则从环境变量获取
-    if not apo_value:
-        apo_value = tmp_conf(conf_name)
-    else:
-        tmp_conf_dict = read_tmp()
-        apo_value = tmp_conf_dict[conf_name]
-        write_tmp(
-            tmp_conf_dict
-        )
+    # if not apo_value:
+    #     apo_value = tmp_conf(conf_name)
+    # else:
+    #     tmp_conf_dict = read_tmp()
+    #     apo_value = tmp_conf_dict[conf_name]
+    #     write_tmp(
+    #         tmp_conf_dict
+    #     )
 
     return apo_value
 

@@ -127,7 +127,7 @@ def cache_services(applications_info):
         services = service_lists
         unavailable_services = set()
     else:
-        logger.debug(cached_services, service_lists, delete_services)
+        logger.debug("{} {} {}".format(cached_services, service_lists, delete_services))
         cached_services_str_list = list(map(lambda service_dict: '_'.join(service_dict.values()), cached_services))
         service_str_lists = list(map(lambda service_dict: '_'.join(service_dict.values()), service_lists))
         delete_str_services = list(map(lambda service_dict: '_'.join(service_dict.values()), delete_services))
