@@ -2,12 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import configparser as ConfigParser
-import os, re, io
-
-from utils.console_logger import Logger
-
-log = Logger()
-logger = log.get_logger()
+import os
+import re
 
 
 def format_config(filename):
@@ -15,7 +11,7 @@ def format_config(filename):
     dir = os.path.dirname(os.path.abspath(__file__))
     path = "%s/" % dir
     filepath = path + filename
-    # print filepath
+
     with open(filepath, "r") as f:
         for line in f:
             line = line.strip().replace("\t", " ")

@@ -3,6 +3,8 @@
 
 import logging
 
+from utils.get_configure import env_file_conf
+
 # 日志级别关系映射
 level_relations = {
     "debug": logging.DEBUG,
@@ -14,7 +16,8 @@ level_relations = {
 
 
 class Logger(object):
-    def __init__(self, name='service_metrics', log_level='info'):
+    def __init__(self, name='service_metrics'):
+        log_level = env_file_conf('LOG_LEVEL').lower()
         self.__logger = logging.getLogger(name)
         log_level = level_relations[log_level]
         self.__logger.setLevel(log_level)

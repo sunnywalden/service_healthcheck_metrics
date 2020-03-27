@@ -32,8 +32,7 @@ def app_status():
     try:
         eureka_ip = apollo_envs_conf(eureka_conf)
     except Exception as e:
-        # print("Connecting apollo failed! %s".format(e.__repr__()))
-        logger.eror("Connecting apollo failed! %s".format(e.__repr__()))
+        logger.error("Getting eureka addr configures from apollo or temp file failed! {}".format(e.__repr__()))
         exit(1)
     global eureka_client
     if not eureka_client:
@@ -54,36 +53,39 @@ def app_status():
     )
     app_default_infos = default_infos(unavailable_services_info)
     logger.debug("Applications health metric: {}".format(app_infos))
-    # print("Applications health metric: {}".format(app_infos))
 
     return {**app_infos, **app_default_infos}
 
 
 def metric_prepare(app, app_infos):
-    # print(" Application {} info {}".format(app, app_infos))
     logger.info(" Application {} info {}".format(app, app_infos))
     metrics = []
 
-    applications_info = tuple(filter(lambda app_info: app_info['status'] != 'UNKNOW', app_infos))
-    for app_info in applications_info:
-        app_statu = 0 if app_info['status'] != "UP" else 1
+    try:
+        applications_info = tuple(filter(lambda app_info: app_info['status'] != 'UNKNOW', app_infos))
+    except TypeError as te:
+        logger.error("Metric {} cannt be resolved!{}".format(app_infos, te.__str__()))
+        exit(1)
+    else:
+        for app_info in applications_info:
+            app_statu = 0 if app_info['status'] != "UP" else 1
 
-        metric_info = [
-            app_info['product'],
-            app_info['service'],
-            env_type,
-            app_info['hostname'],
-            app_info['hostname'],
-            app_info['health_check'],
-            app_info['service_addr'],
-            app_info['home_page'],
-            app_statu
-        ]
+            metric_info = [
+                app_info['product'],
+                app_info['service'],
+                env_type,
+                app_info['hostname'],
+                app_info['hostname'],
+                app_info['health_check'],
+                app_info['service_addr'],
+                app_info['home_page'],
+                app_statu
+            ]
 
-        try:
-            metrics.index(metric_info)
-        except:
-            yield metric_info
+            try:
+                metrics.index(metric_info)
+            except:
+                yield metric_info
 
 
 class AppCollector(object):
@@ -112,7 +114,6 @@ class AppCollector(object):
             metrics = metric_prepare(app, app_infos)
             for metric in metrics:
                 g.add_metric(metric[:-1], metric[-1])
-                # print(metric[:-1], metric[-1])
                 logger.info(metric)
 
         yield g
@@ -126,8 +127,7 @@ if __name__ == "__main__":
     try:
         REGISTRY.register(AppCollector())
     except AttributeError as e:
-        # print("Connecting to apollo server failed!")
-        logger.error("Connecting to apollo server failed!")
+        logger.error("Connecting to apollo server failed!{}".format(e.__str__()))
         exit(1)
 
     while True:

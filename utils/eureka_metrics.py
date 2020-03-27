@@ -21,7 +21,6 @@ def get_client(eureka_hosts="127.0.0.1"):
     try:
         eureka_client.init_discovery_client(eureka_hosts)
     except AttributeError as et:
-        # print("Eureka connetion failed! %e".format(et.__str__()))
         logger.error("Eureka connetion failed! %e".format(et.__str__()))
         return None
     else:
@@ -75,7 +74,6 @@ def applications_info(app_objs):
     for app_obj in app_objs:
         apps_info[app_obj.name] = service_info(app_obj.instances)
 
-    # print("Debug all applications {}".format(apps_info))
     logger.info("Debug all applications {}".format(apps_info))
 
     return apps_info
@@ -106,7 +104,6 @@ def service_info(instances):
             }
         )
 
-    # print("Debug all services {}".format(ins_info))
     logger.debug("Debug all services {}".format(ins_info))
 
     return ins_info
@@ -122,7 +119,6 @@ def cache_services(applications_info):
     service_lists = []
     for app_name, app_info_list in applications_info.items():
         for app_info in app_info_list:
-            # print(app_info)
             logger.info(app_info)
             service_lists.append({"product": app_info["product"], "service": app_info["service"], "env_type": env_type})
     cached_services = cache_get('services')
@@ -131,7 +127,7 @@ def cache_services(applications_info):
         services = service_lists
         unavailable_services = set()
     else:
-        # print(cached_services, service_lists, delete_services)
+        logger.debug(cached_services, service_lists, delete_services)
         cached_services_str_list = list(map(lambda service_dict: '_'.join(service_dict.values()), cached_services))
         service_str_lists = list(map(lambda service_dict: '_'.join(service_dict.values()), service_lists))
         delete_str_services = list(map(lambda service_dict: '_'.join(service_dict.values()), delete_services))
@@ -146,7 +142,6 @@ def cache_services(applications_info):
             }, all_services))
 
     cache_set('services', services)
-    # print("Service cache updated!")
     logger.info("Service cache updated!")
     return unavailable_services
 
@@ -164,7 +159,7 @@ def default_infos(service_list):
             'data_center': '',
             'hostname': ''
         }
-        service_infos[service] = {**service_dict, **default_attr}
+        service_infos[service] = [].append({**service_dict, **default_attr})
 
     return service_infos
 

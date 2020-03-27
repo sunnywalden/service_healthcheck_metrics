@@ -8,6 +8,7 @@ services:
     environment:
       ENV_TYPE: prod
       EXTERNAL: "false"
+      LOG_LEVEL: info
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8080"]
       interval: 2m

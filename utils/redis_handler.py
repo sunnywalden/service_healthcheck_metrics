@@ -24,7 +24,7 @@ def redis_conf():
     redis_db = apollo_envs_conf("redis_db")
     redis_passwd = apollo_envs_conf("redis_passwd")
 
-    logger.info("Debug redis info {} {} {}".format(redis_host, redis_port, redis_db))
+    logger.debug("Debug redis info {} {} {}".format(redis_host, redis_port, redis_db))
 
     return {
         "host": redis_host,
@@ -59,7 +59,6 @@ def cache_get(name):
     try:
         val = json.loads(r.get(name)) if r.get(name) else []
     except Exception as e:
-        # print("Get {} value from cache failed!{}".format(name, e.__str__()))
         logger.error("Get {} value from cache failed!{}".format(name, e.__str__()))
         return None
     else:
@@ -75,10 +74,8 @@ def cache_set(name, val):
     try:
         res = r.set(name=name, value=json.dumps(val))
     except Exception as e:
-        # print("Storage {} to cache failed!{}".format(name, e.__str__()))
         logger.error("Storage {} to cache failed!{}".format(name, e.__str__()))
         return None
     else:
-        # print("{} values {}".format(name, val))
         logger.info("{} values {}".format(name, val))
         return res
