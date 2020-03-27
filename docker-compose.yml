@@ -9,10 +9,11 @@ services:
       ENV_TYPE: prod
       EXTERNAL: "false"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080"/, "||", "exit", "1"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080"]
       interval: 2m
       timeout: 10s
       retries: 3
+      start_period: 60s
     volumes:
       - /data/healthcheck_metrics/configs/:/opt/application/healthcheck_metrics/configs/
     networks:
