@@ -9,7 +9,7 @@ from utils.config import config
 from utils.console_logger import Logger
 
 log = Logger()
-logger = log.logger()
+logger = log.get_logger()
 
 
 def env_file_conf(conf_name, conf_type='string', default=None):

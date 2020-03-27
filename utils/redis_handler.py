@@ -8,7 +8,7 @@ from utils.get_configure import apollo_envs_conf, env_file_conf
 from utils.console_logger import Logger
 
 log = Logger()
-logger = log.logger()
+logger = log.get_logger()
 
 
 def redis_conf():
@@ -24,7 +24,7 @@ def redis_conf():
     redis_db = apollo_envs_conf("redis_db")
     redis_passwd = apollo_envs_conf("redis_passwd")
 
-    print("Debug redis info {} {} {}".format(redis_host, redis_port, redis_db))
+    logger.info("Debug redis info {} {} {}".format(redis_host, redis_port, redis_db))
 
     return {
         "host": redis_host,
@@ -60,7 +60,7 @@ def cache_get(name):
         val = json.loads(r.get(name)) if r.get(name) else []
     except Exception as e:
         # print("Get {} value from cache failed!{}".format(name, e.__str__()))
-        print("Get {} value from cache failed!{}".format(name, e.__str__()))
+        logger.error("Get {} value from cache failed!{}".format(name, e.__str__()))
         return None
     else:
         return val
@@ -76,9 +76,9 @@ def cache_set(name, val):
         res = r.set(name=name, value=json.dumps(val))
     except Exception as e:
         # print("Storage {} to cache failed!{}".format(name, e.__str__()))
-        print("Storage {} to cache failed!{}".format(name, e.__str__()))
+        logger.error("Storage {} to cache failed!{}".format(name, e.__str__()))
         return None
     else:
         # print("{} values {}".format(name, val))
-        print("{} values {}".format(name, val))
+        logger.info("{} values {}".format(name, val))
         return res

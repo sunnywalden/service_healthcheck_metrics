@@ -9,7 +9,7 @@ from utils.redis_handler import cache_get, cache_set
 from utils.console_logger import Logger
 
 log = Logger()
-logger = log.logger()
+logger = log.get_logger()
 
 
 def get_client(eureka_hosts="127.0.0.1"):
@@ -21,7 +21,8 @@ def get_client(eureka_hosts="127.0.0.1"):
     try:
         eureka_client.init_discovery_client(eureka_hosts)
     except AttributeError as et:
-        print("Eureka connetion failed! %e".format(et.__str__()))
+        # print("Eureka connetion failed! %e".format(et.__str__()))
+        logger.error("Eureka connetion failed! %e".format(et.__str__()))
         return None
     else:
         return eureka_client
@@ -74,7 +75,8 @@ def applications_info(app_objs):
     for app_obj in app_objs:
         apps_info[app_obj.name] = service_info(app_obj.instances)
 
-    print("Debug all applications {}".format(apps_info))
+    # print("Debug all applications {}".format(apps_info))
+    logger.info("Debug all applications {}".format(apps_info))
 
     return apps_info
 
@@ -105,6 +107,7 @@ def service_info(instances):
         )
 
     # print("Debug all services {}".format(ins_info))
+    logger.debug("Debug all services {}".format(ins_info))
 
     return ins_info
 
@@ -119,7 +122,8 @@ def cache_services(applications_info):
     service_lists = []
     for app_name, app_info_list in applications_info.items():
         for app_info in app_info_list:
-            print(app_info)
+            # print(app_info)
+            logger.info(app_info)
             service_lists.append({"product": app_info["product"], "service": app_info["service"], "env_type": env_type})
     cached_services = cache_get('services')
     delete_services = unregister_services_conf()
@@ -127,7 +131,7 @@ def cache_services(applications_info):
         services = service_lists
         unavailable_services = set()
     else:
-        print(cached_services, service_lists, delete_services)
+        # print(cached_services, service_lists, delete_services)
         cached_services_str_list = list(map(lambda service_dict: '_'.join(service_dict.values()), cached_services))
         service_str_lists = list(map(lambda service_dict: '_'.join(service_dict.values()), service_lists))
         delete_str_services = list(map(lambda service_dict: '_'.join(service_dict.values()), delete_services))
@@ -142,7 +146,8 @@ def cache_services(applications_info):
             }, all_services))
 
     cache_set('services', services)
-    print("Service cache updated!")
+    # print("Service cache updated!")
+    logger.info("Service cache updated!")
     return unavailable_services
 
 
@@ -175,8 +180,6 @@ if __name__ == '__main__':
     server_host = "app-status.sunnywalden.com"
     application_name = "SERVICE-MONITOR"
     regions = ['default']
-    # # while True:
-    # register_ops()
     all_apps = get_applications(eureka_ip)
     app_infos = applications_info(all_apps)
     cache_services(app_infos)

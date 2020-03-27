@@ -14,12 +14,11 @@ sys.path.append(BASE_DIR)
 from utils.get_configure import apollo_envs_conf, env_file_conf
 from utils.eureka_metrics import get_client, get_applications, applications_info, cache_services, default_infos
 from utils.console_logger import Logger
-from main.metric_threading import MetricThread
 
 eureka_client = None
 env_type = env_file_conf('ENV_TYPE', default='DEV')
 log = Logger()
-logger = log.logger()
+logger = log.get_logger()
 
 
 def app_status():
@@ -33,7 +32,8 @@ def app_status():
     try:
         eureka_ip = apollo_envs_conf(eureka_conf)
     except Exception as e:
-        print("Connecting apollo failed! %s".format(e.__repr__()))
+        # print("Connecting apollo failed! %s".format(e.__repr__()))
+        logger.eror("Connecting apollo failed! %s".format(e.__repr__()))
         exit(1)
     global eureka_client
     if not eureka_client:
@@ -53,21 +53,26 @@ def app_status():
             unavailable_services)
     )
     app_default_infos = default_infos(unavailable_services_info)
-    print("Applications health metric: %s".format(app_infos))
+    logger.debug("Applications health metric: {}".format(app_infos))
+    # print("Applications health metric: {}".format(app_infos))
 
     return {**app_infos, **app_default_infos}
 
 
 def metric_prepare(app, app_infos):
-    print(" Application %s info %s" % (app, app_infos))
+    # print(" Application {} info {}".format(app, app_infos))
+    logger.info(" Application {} info {}".format(app, app_infos))
     metrics = []
-    for app_info in app_infos:
+
+    applications_info = tuple(filter(lambda app_info: app_info['status'] != 'UNKNOW', app_infos))
+    for app_info in applications_info:
         app_statu = 0 if app_info['status'] != "UP" else 1
 
         metric_info = [
             app_info['product'],
             app_info['service'],
             env_type,
+            app_info['hostname'],
             app_info['hostname'],
             app_info['health_check'],
             app_info['service_addr'],
@@ -78,18 +83,7 @@ def metric_prepare(app, app_infos):
         try:
             metrics.index(metric_info)
         except:
-
-            try:
-                metrics.append(
-                    metric_info
-                )
-            except Exception as e:
-                print('Error while prepare metric {}'.format(e.__str__()))
-                exit(1)
-            else:
-                print('push metric finished one time!')
-
-    return metrics
+            yield metric_info
 
 
 class AppCollector(object):
@@ -100,11 +94,6 @@ class AppCollector(object):
     def __init__(self, thread_num=10):
         self.app_list = app_status()
         self.thread_num = thread_num
-        self.g = GaugeMetricFamily(
-            "service_health_status",
-            "Application Health Status",
-            labels=["product", "service", "env_type", "hostname", "health_check", "service_addr", "homepage"]
-        )
 
     def collect(self):
         """
@@ -112,28 +101,21 @@ class AppCollector(object):
                 生成metric
         """
 
-        threads = []
+        g = GaugeMetricFamily(
+            "service_health_status",
+            "Application Health Status",
+            labels=["product", "service", "env_type", "hostname", "instance", "health_check", "service_addr",
+                    "homepage"]
+        )
+
         for app, app_infos in self.app_list.items():
-            for i in range(self.thread_num):
-                thread = MetricThread(metric_prepare, args=(app, app_infos))
-                threads.append(thread)
-
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-        metric_list = []
-        for thread in threads:
-            thread_res = thread.get_result()
-            if thread_res:
-                metric_list.append(thread_res)
-
-        for metrics in metric_list:
+            metrics = metric_prepare(app, app_infos)
             for metric in metrics:
-                self.g.add_metric(metric[:-1], metric[-1])
-                print(metric[:-1], metric[-1])
+                g.add_metric(metric[:-1], metric[-1])
+                # print(metric[:-1], metric[-1])
+                logger.info(metric)
 
-        yield self.g
+        yield g
 
 
 if __name__ == "__main__":
@@ -142,11 +124,11 @@ if __name__ == "__main__":
     """
     start_http_server(8080)
     try:
-            REGISTRY.register(AppCollector())
+        REGISTRY.register(AppCollector())
     except AttributeError as e:
-            print("Connecting to apollo server failed!")
-            exit(1)
+        # print("Connecting to apollo server failed!")
+        logger.error("Connecting to apollo server failed!")
+        exit(1)
+
     while True:
-            time.sleep(60)
-
-
+        time.sleep(60)
