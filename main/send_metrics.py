@@ -6,14 +6,15 @@ import sys
 import time
 
 from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily, HistogramMetricFamily
+from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
 BASE_DIR = os.path.abspath(os.path.join(os.getcwd(), "."))
 sys.path.append(BASE_DIR)
 
-from utils.get_configure import apollo_envs_conf, env_file_conf
+from utils.get_configure import env_file_conf
 from utils.eureka_metrics import get_client, get_applications, applications_info, cache_services, default_infos
 from utils.console_logger import Logger
+from utils.apollo_handler import apo_client, apollo_envs_conf
 
 eureka_client = None
 env_type = env_file_conf('ENV_TYPE', default='DEV')
@@ -21,7 +22,7 @@ log = Logger()
 logger = log.get_logger()
 
 
-def app_status():
+def app_status(apollo_client):
     """
             从eureka获取服务health check数据
             :return: list
@@ -30,7 +31,7 @@ def app_status():
     external = env_file_conf('EXTERNAL', conf_type='bool')
     eureka_conf = 'eureka_ip' if not external else 'eureka_external_ip'
     try:
-        eureka_ip = apollo_envs_conf(eureka_conf)
+        eureka_ip = apollo_envs_conf(apollo_client, eureka_conf)
     except Exception as e:
         logger.error("Getting eureka addr configures from apollo or temp file failed! {}".format(e.__repr__()))
         exit(1)
@@ -41,7 +42,7 @@ def app_status():
     all_apps = get_applications(eureka_ip, eureka_client)
     eureka_client.stop()
     app_infos = applications_info(all_apps)
-    unavailable_services = cache_services(app_infos)
+    unavailable_services = cache_services(apollo_client, app_infos)
     unavailable_services_info = list(
         map(
             lambda service_str: {
@@ -80,6 +81,7 @@ def metric_prepare(app, app_infos):
                 app_info['service_addr'],
                 app_info['home_page'],
                 app_statu
+                # "DOWN"
             ]
 
             try:
@@ -92,9 +94,8 @@ class AppCollector(object):
     """
             prometheus custom metric collector
     """
-
-    def __init__(self, thread_num=10):
-        self.thread_num = thread_num
+    def __init__(self, apollo_client):
+        self.apollo_client = apollo_client
 
     def collect(self):
         """
@@ -109,7 +110,7 @@ class AppCollector(object):
                     "homepage"]
         )
 
-        app_list = app_status()
+        app_list = app_status(self.apollo_client)
 
         for app, app_infos in app_list.items():
             if not app_infos: break
@@ -126,12 +127,12 @@ if __name__ == "__main__":
             通过http暴露metrics
     """
     start_http_server(8080)
+    apollo_client = apo_client()
+    apollo_client.start()
+    REGISTRY.register(AppCollector(apollo_client))
+    apollo_client.stop()
+
     while True:
-        try:
-            metric_collector = AppCollector()
-            REGISTRY.register(metric_collector)
-        except AttributeError as e:
-            logger.error("Connecting to apollo server failed!{}".format(e.__str__()))
-            exit(1)
-        else:
-            time.sleep(60)
+        time.sleep(60)
+
+

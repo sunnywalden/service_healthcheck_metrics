@@ -4,9 +4,10 @@
 
 from py_eureka_client import eureka_client
 
-from utils.get_configure import apollo_envs_conf, env_file_conf, unregister_services_conf
+from utils.get_configure import env_file_conf, unregister_services_conf
 from utils.redis_handler import cache_get, cache_set
 from utils.console_logger import Logger
+from utils.apollo_handler import apollo_envs_conf
 
 log = Logger()
 logger = log.get_logger()
@@ -109,7 +110,7 @@ def service_info(instances):
     return ins_info
 
 
-def cache_services(applications_info):
+def cache_services(apollo_client, applications_info):
     """
             服务注册到缓存
             :param app_infos: service_info返回的所有服务状态信息
@@ -121,7 +122,7 @@ def cache_services(applications_info):
         for app_info in app_info_list:
             logger.info(app_info)
             service_lists.append({"product": app_info["product"], "service": app_info["service"], "env_type": env_type})
-    cached_services = cache_get('services')
+    cached_services = cache_get(apollo_client, 'services')
     delete_services = unregister_services_conf()
     if not cached_services:
         services = service_lists
@@ -141,7 +142,7 @@ def cache_services(applications_info):
                 "env_type": service_str.split('_')[2]
             }, all_services))
 
-    cache_set('services', services)
+    cache_set(apollo_client, 'services', services)
     logger.info("Service cache updated!")
     return unavailable_services
 
