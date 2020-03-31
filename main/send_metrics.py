@@ -6,7 +6,7 @@ import sys
 import time
 
 from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily
+from prometheus_client.core import REGISTRY, GaugeMetricFamily, HistogramMetricFamily
 
 BASE_DIR = os.path.abspath(os.path.join(os.getcwd(), "."))
 sys.path.append(BASE_DIR)
@@ -94,7 +94,6 @@ class AppCollector(object):
     """
 
     def __init__(self, thread_num=10):
-        self.app_list = app_status()
         self.thread_num = thread_num
 
     def collect(self):
@@ -110,7 +109,9 @@ class AppCollector(object):
                     "homepage"]
         )
 
-        for app, app_infos in self.app_list.items():
+        app_list = app_status()
+
+        for app, app_infos in app_list.items():
             if not app_infos: break
             metrics = metric_prepare(app, app_infos)
             for metric in metrics:
@@ -134,4 +135,3 @@ if __name__ == "__main__":
             exit(1)
         else:
             time.sleep(60)
-
