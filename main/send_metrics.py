@@ -125,11 +125,13 @@ if __name__ == "__main__":
             通过http暴露metrics
     """
     start_http_server(8080)
-    try:
-        REGISTRY.register(AppCollector())
-    except AttributeError as e:
-        logger.error("Connecting to apollo server failed!{}".format(e.__str__()))
-        exit(1)
-
     while True:
-        time.sleep(60)
+        try:
+            metric_collector = AppCollector()
+            REGISTRY.register(metric_collector)
+        except AttributeError as e:
+            logger.error("Connecting to apollo server failed!{}".format(e.__str__()))
+            exit(1)
+        else:
+            time.sleep(60)
+
