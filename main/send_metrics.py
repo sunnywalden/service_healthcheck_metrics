@@ -16,31 +16,40 @@ from utils.eureka_metrics import get_client, get_applications, applications_info
 from utils.console_logger import Logger
 from utils.apollo_handler import apo_client, apollo_envs_conf
 
-eureka_client = None
+
 env_type = env_file_conf('ENV_TYPE', default='DEV')
 log = Logger()
 logger = log.get_logger()
 
+ek_client = None
+eureka_ip = '127.0.0.1'
 
-def app_status(apollo_client):
-    """
-            从eureka获取服务health check数据
-            :return: list
-    """
-    eureka_ip = '127.0.0.1'
+
+def eureka_client():
+
     external = env_file_conf('EXTERNAL', conf_type='bool')
     eureka_conf = 'eureka_ip' if not external else 'eureka_external_ip'
+    global eureka_ip
     try:
         eureka_ip = apollo_envs_conf(apollo_client, eureka_conf)
     except Exception as e:
         logger.error("Getting eureka addr configures from apollo or temp file failed! {}".format(e.__repr__()))
         exit(1)
-    global eureka_client
-    if not eureka_client:
-        eureka_client = get_client(eureka_ip)
-        if not eureka_client: return None
+    global ek_client
+    if not ek_client:
+        ek_client = get_client(eureka_ip)
+    if not ek_client: return None
+
+    return ek_client
+
+
+def app_status(apollo_client, eureka_client):
+    """
+            从eureka获取服务health check数据
+            :return: list
+    """
+
     all_apps = get_applications(eureka_ip, eureka_client)
-    eureka_client.stop()
     app_infos = applications_info(all_apps)
     unavailable_services = cache_services(apollo_client, app_infos)
     unavailable_services_info = list(
@@ -48,14 +57,17 @@ def app_status(apollo_client):
             lambda service_str: {
                 "product": service_str.split('_')[0],
                 "service": service_str.split('_')[1],
-                "env_type": service_str.split('_')[2]
+                "env_type": service_str.split('_')[2],
+                # "status": "DOWN"
             },
             unavailable_services)
     )
+    logger.info("Services unavailable info {}".format(unavailable_services_info))
     app_default_infos = default_infos(unavailable_services_info)
     logger.debug("Applications health metric: {}".format(app_infos))
 
     return {**app_infos, **app_default_infos}
+    # return app_infos.extend(app_default_infos)
 
 
 def metric_prepare(app, app_infos):
@@ -81,7 +93,6 @@ def metric_prepare(app, app_infos):
                 app_info['service_addr'],
                 app_info['home_page'],
                 app_statu
-                # "DOWN"
             ]
 
             try:
@@ -94,8 +105,9 @@ class AppCollector(object):
     """
             prometheus custom metric collector
     """
-    def __init__(self, apollo_client):
+    def __init__(self, apollo_client, eureka_client):
         self.apollo_client = apollo_client
+        self.eureka_client = eureka_client
 
     def collect(self):
         """
@@ -110,7 +122,7 @@ class AppCollector(object):
                     "homepage"]
         )
 
-        app_list = app_status(self.apollo_client)
+        app_list = app_status(self.apollo_client, self.eureka_client)
 
         for app, app_infos in app_list.items():
             if not app_infos: break
@@ -128,9 +140,11 @@ if __name__ == "__main__":
     """
     start_http_server(8080)
     apollo_client = apo_client()
+    ek_client = eureka_client()
     apollo_client.start()
-    REGISTRY.register(AppCollector(apollo_client))
+    REGISTRY.register(AppCollector(apollo_client, ek_client))
     apollo_client.stop()
+    ek_client.stop()
 
     while True:
         time.sleep(60)

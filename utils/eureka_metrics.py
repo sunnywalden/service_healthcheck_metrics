@@ -143,6 +143,7 @@ def cache_services(apollo_client, applications_info):
             }, all_services))
 
     cache_set(apollo_client, 'services', services)
+    logger.info("Services unavailable are: {}".format(unavailable_services))
     logger.info("Service cache updated!")
     return unavailable_services
 
@@ -150,18 +151,23 @@ def cache_services(apollo_client, applications_info):
 def default_infos(service_list):
     service_infos = {}
     for service_dict in service_list:
+        logger.debug(service_dict)
         service = service_dict["service"]
         default_attr = {
             'status': 'Down',
             'health_check': '',
             'home_page': '',
             'status_page': '',
-            'service_addr': '',
-            'data_center': '',
+            'service_addr': service,
+            # 'data_center': '',
             'hostname': ''
         }
-        service_infos[service] = [].append({**service_dict, **default_attr})
 
+        service_attr = {**service_dict, **default_attr}
+        logger.debug('Debug merged service default info {}'.format(service_attr))
+        service_infos[service] = [service_attr]
+
+    logger.info("Down status services info {}".format(service_infos))
     return service_infos
 
 
