@@ -24,6 +24,9 @@
 		port 监控数据来源应用端口
 		app  应用名称
 
+## know how
+
+![Image text](./images/service_status_monitor.png)
 
 ## Getting Started
 
