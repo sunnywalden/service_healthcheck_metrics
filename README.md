@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://github.com/hhyo/archery/blob/master/LICENSE)
 [![version](https://img.shields.io/badge/python-3.7.5-blue.svg)](https://www.python.org/downloads/release/python-375/)
 
+## What it is
+
     本项目作为Prometheus（为了方便，下文均采用简称：Prome）监控方案中，应用监控的实现。从Eureka获取所有服务的监控状态数据，
 
 将数据格式转换到Prome的metric格式，通过http协议暴露在指定端口的/metrics路径下。Prome通过pull请求获取。
@@ -27,10 +29,6 @@
 ## know how
 
 ![Image text](./images/service_status_monitor.png)
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 
 ### configure
