@@ -45,12 +45,15 @@ def unregister_services_conf():
     all_services = []
     if not service_dict: return all_services
     for product, service_str in service_dict.items():
-        for service in services_str.split(','):
-            service_attr = {"product": all_services[product], "service": service, "env_type": env_type}
+        # print("Debug {}".format(service_str))
+        services_list = service_str.split(',')
+        for service in services_list:
+            service_attr = {"product": product, "service": service, "env_type": env_type.lower()}
             try:
                 all_services.index(service_attr)
             except ValueError:
                 all_services.append(service_attr)
+    print("Deleted services: {}".format(all_services))
     return all_services
 
 
