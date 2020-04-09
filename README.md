@@ -52,7 +52,3 @@ docker-compose up -d
 
 
 
-## Acknowledgments
-
-* serverdensity/python-daemon
-
